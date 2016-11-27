@@ -20,6 +20,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	private StartMenu startMenu;
 	private LostMenu lostMenu;
 	private TimeText timeText;
+	private Background background;
 
 	private float timePast;		//o the time that passed since game started
 	private boolean isGame;		//o checks if the game has started
@@ -30,6 +31,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	private int posY;		//o the y position of the finger on the screen
 	private int dir1;		//o down or up (and speed) for 3rd block
 	private int dir2;		//o down or up (and speed) for 4th block
+	private int dir3;		//o down or up (and speed) for 5th block
+	private int dir4;		//o down or up (and speed) for 6th block
 	private float highScore;
 	private boolean lostFlag;		//o so high score will not continue after loosing
 	private float score;
@@ -38,15 +41,17 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	@Override
 	public void create ()
 	{
+		background = new Background();
+
 		//o the high score
 		prefs = Gdx.app.getPreferences("highScore");
 		highScore = prefs.getFloat("highScore");
 		lostFlag = false;
 
-		blocks = new Block[4];
+		blocks = new Block[6];
 
 		//o sets the places for the first blocks
-		for (int i = 0; i<4; i++)
+		for (int i = 0; i<6; i++)
 		{
 			blocks[i] = new Block();
 			blocks[i].setHeight(randomHeighth());
@@ -70,6 +75,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		blocks[3].setPosX(Gdx.graphics.getWidth());
 		blocks[3].setPosY(randomPos2(blocks[3].getHeight()));
 
+		blocks[4].setPosX(0-blocks[4].getWidth());
+		blocks[4].setPosY(randomPos2(blocks[4].getHeight()));
+
+		blocks[5].setPosX(Gdx.graphics.getWidth());
+		blocks[5].setPosY(randomPos2(blocks[5].getHeight()));
+
 
 		startMenu = new StartMenu();
 		lostMenu = new LostMenu();
@@ -92,18 +103,22 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	{
 		Gdx.gl.glClearColor(1, 1, 1, 1);		//o clearing the screen and making it white
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
 		Gdx.input.setInputProcessor(this);		//o setting the input from the phone (pressing the screen)
+		//o draws the background
+		background.drawBackground();
+
 		timePast += graphics.getDeltaTime();		//o calculate the time that past simce game has began
 
 
 		//o if the player had started the game
 		if (isGame)
 		{
-			timeText.drawText(timePast);        //o shows the time text
-
-			if(timePast > 4.0 )
+			if (timePast > 4.0)
 				blocks[3].setEnable(true);
+			if (timePast > 7.0)
+				blocks[4].setEnable(true);
+			if (timePast > 10.0)
+				blocks[5].setEnable(true);
 
 			//o if 1st block reach end
 			if ((blocks[0].getPosY() <= 0 - blocks[0].getHeight())) {
@@ -143,15 +158,36 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 				dir2 = randomDir();
 			}
 
+			//o if 5th block reach end
+			if (((blocks[4].getPosY() <= 0 - blocks[4].getHeight()) || (blocks[4].getPosX() <= 0 - blocks[4].getWidth())) || (blocks[4].getPosY() >= Gdx.graphics.getHeight()) || (blocks[4].getPosX() >= Gdx.graphics.getWidth())) {
+				blocks[4].setHeight(randomHeighth());
+				blocks[4].setWidth((randomWidth()));
+				blocks[4].setPosX(0-blocks[4].getWidth());
+				blocks[4].setPosY(randomPos2(blocks[4].getHeight()));
+				blocks[4].setSpeed(randomSpeed(timePast));
+				dir3 = randomDir();
+			}
+
+			//o if 6th block reach end
+			if (((blocks[5].getPosY() <= 0 - blocks[5].getHeight()) || (blocks[5].getPosX() <= 0 - blocks[5].getWidth())) || (blocks[5].getPosY() >= Gdx.graphics.getHeight()) || (blocks[5].getPosX() >= Gdx.graphics.getWidth())) {
+				blocks[5].setHeight(randomHeighth());
+				blocks[5].setWidth((randomWidth()));
+				blocks[5].setPosX(Gdx.graphics.getWidth());
+				blocks[5].setPosY(randomPos2(blocks[5].getHeight()));
+				blocks[5].setSpeed(randomSpeed(timePast));
+				dir4 = randomDir();
+			}
+
 			//o draw the blocks in their position
 			blocks [0].drawBlock(blocks[0].getPosX(), blocks[0].getPosY() - blocks[0].getSpeed(), blocks[0].getHeight(), blocks[0].getWidth());
 			blocks [1].drawBlock(blocks[1].getPosX(), blocks[1].getPosY() + blocks[1].getSpeed(), blocks[1].getHeight(), blocks[1].getWidth());
 			blocks [2].drawBlock(blocks[2].getPosX() + blocks[2].getSpeed(), blocks[2].getPosY() + dir1 , blocks[2].getHeight(), blocks[2].getWidth());
 			blocks [3].drawBlock(blocks[3].getPosX() - blocks[3].getSpeed(), blocks[3].getPosY() + dir2 , blocks[3].getHeight(), blocks[3].getWidth());
-
+			blocks [4].drawBlock(blocks[4].getPosX() + blocks[4].getSpeed(), blocks[4].getPosY() + dir3 , blocks[4].getHeight(), blocks[4].getWidth());
+			blocks [5].drawBlock(blocks[5].getPosX() - blocks[5].getSpeed(), blocks[5].getPosY() + dir4 , blocks[5].getHeight(), blocks[5].getWidth());
 
 			//o checks if finger hits the blocks and game is lost
-			for (int i=0; i<4; i++)
+			for (int i=0; i<6; i++)
 			{
 				if (didTouchBlock(blocks[i], posX, posY))
 				{
@@ -161,7 +197,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 			}
 
 
-
+			timeText.drawText(timePast);        //o shows the time text
 		}
 
 
@@ -197,9 +233,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 			timeText.drawScoreText(score, "score");
 			lostFlag = true;
 		}
-
-
-
 
 
 

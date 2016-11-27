@@ -24,7 +24,7 @@ public class TimeText
     public void drawText (float time )
     {
         spriteBatch.begin();
-        font.setColor(Color.BLUE);
+        font.setColor(Color.WHITE);
         font.getData().setScale(6);
         font.draw(spriteBatch, subText(time), font.getScaleX() , Gdx.graphics.getHeight()-font.getScaleY());
         spriteBatch.end();
