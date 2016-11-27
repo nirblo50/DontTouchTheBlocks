@@ -16,7 +16,7 @@ public class Background
 
     public Background()
     {
-        texture = new Texture(Gdx.files.internal("background.png"));
+        texture = new Texture(Gdx.files.internal("background2.png"));
         batch = new SpriteBatch();
 
     }

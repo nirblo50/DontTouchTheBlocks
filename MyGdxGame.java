@@ -16,7 +16,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	//o the Preferences of the high score
 	Preferences prefs;
 
-	private Block[] blocks;
+	private Blocks[] blocks;
 	private StartMenu startMenu;
 	private LostMenu lostMenu;
 	private TimeText timeText;
@@ -33,6 +33,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	private int dir2;		//o down or up (and speed) for 4th block
 	private int dir3;		//o down or up (and speed) for 5th block
 	private int dir4;		//o down or up (and speed) for 6th block
+	private int dir5;		//o down or up (and speed) for 7th block
+	private int dir6;		//o down or up (and speed) for 8th block
+
 	private float highScore;
 	private boolean lostFlag;		//o so high score will not continue after loosing
 	private float score;
@@ -48,12 +51,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		highScore = prefs.getFloat("highScore");
 		lostFlag = false;
 
-		blocks = new Block[6];
+		blocks = new Blocks[8];
 
 		//o sets the places for the first blocks
-		for (int i = 0; i<6; i++)
+		for (int i = 0; i<blocks.length; i++)
 		{
-			blocks[i] = new Block();
+			blocks[i] = new Blocks();
 			blocks[i].setHeight(randomHeighth());
 			blocks[i].setWidth(randomWidth());
 		}
@@ -81,6 +84,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		blocks[5].setPosX(Gdx.graphics.getWidth());
 		blocks[5].setPosY(randomPos2(blocks[5].getHeight()));
 
+		blocks[6].setPosX(Gdx.graphics.getWidth());
+		blocks[6].setPosY(-blocks[6].getHeight());
+
+		blocks[7].setPosX(randomPos(blocks[7].getWidth()));
+		blocks[7].setPosY(Gdx.graphics.getHeight());
+
 
 		startMenu = new StartMenu();
 		lostMenu = new LostMenu();
@@ -95,6 +104,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 
 		dir1 = randomDir();
 		dir2 = randomDir();
+		dir3 = randomDir();
+		dir4 = randomDir();
 
 	}
 
@@ -113,12 +124,17 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		//o if the player had started the game
 		if (isGame)
 		{
-			if (timePast > 4.0)
+			if (timePast > 2.5)
 				blocks[3].setEnable(true);
-			if (timePast > 7.0)
+			if (timePast > 5.0)
 				blocks[4].setEnable(true);
-			if (timePast > 10.0)
+			if (timePast > 7.5)
 				blocks[5].setEnable(true);
+			if (timePast > 10.0)
+				blocks[6].setEnable(true);
+			if (timePast > 12.0)
+				blocks[7].setEnable(true);
+
 
 			//o if 1st block reach end
 			if ((blocks[0].getPosY() <= 0 - blocks[0].getHeight())) {
@@ -139,7 +155,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 			}
 
 			//o if 3rd block reach end
-			if (((blocks[2].getPosY() <= 0 - blocks[2].getHeight()) || (blocks[2].getPosX() <= 0 - blocks[2].getWidth())) || (blocks[2].getPosY() >= Gdx.graphics.getHeight()) || (blocks[2].getPosX() >= Gdx.graphics.getWidth())) {
+			if (((blocks[2].getPosY() <= 0 - blocks[2].getHeight()) || (blocks[2].getPosX() <= 0 - blocks[2].getWidth())) || (blocks[2].getPosY() >= Gdx.graphics.getHeight()) || (blocks[2].getPosX() >= Gdx.graphics.getWidth()) || (blocks[2].getPosY() <= -blocks[2].getHeight())) {
 				blocks[2].setHeight(randomHeighth());
 				blocks[2].setWidth((randomWidth()));
 				blocks[2].setPosX(0-blocks[2].getWidth());
@@ -178,6 +194,29 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 				dir4 = randomDir();
 			}
 
+			//o if 7th block reach end
+			if ( (blocks[6].getPosY() >= Gdx.graphics.getHeight()) || (blocks[1].getPosY() >= Gdx.graphics.getHeight()) || (blocks[6].getPosY() <= -blocks[6].getHeight()))
+			{
+				blocks[6].setHeight(randomHeighth());
+				blocks[6].setWidth((randomWidth()));
+				blocks[6].setPosX(Gdx.graphics.getWidth());
+				blocks[6].setPosY(-blocks[6].getHeight());
+				blocks[6].setSpeed(randomSpeed(timePast));
+				dir5 = randomDir();
+			}
+
+			//o if 8th block reach end
+			if ((blocks[7].getPosY() <= - blocks[7].getHeight()) || (blocks[7].getPosY() >= Gdx.graphics.getHeight()) || (blocks[7].getPosY() <= -blocks[7].getHeight())) {
+				blocks[7].setHeight(randomHeighth());
+				blocks[7].setWidth((randomWidth()));
+				blocks[7].setPosX(randomPos(blocks[7].getWidth()));
+				blocks[7].setPosY(Gdx.graphics.getHeight());
+				blocks[7].setSpeed(randomSpeed(timePast));
+				dir6 = randomDir();
+			}
+
+
+
 			//o draw the blocks in their position
 			blocks [0].drawBlock(blocks[0].getPosX(), blocks[0].getPosY() - blocks[0].getSpeed(), blocks[0].getHeight(), blocks[0].getWidth());
 			blocks [1].drawBlock(blocks[1].getPosX(), blocks[1].getPosY() + blocks[1].getSpeed(), blocks[1].getHeight(), blocks[1].getWidth());
@@ -185,9 +224,11 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 			blocks [3].drawBlock(blocks[3].getPosX() - blocks[3].getSpeed(), blocks[3].getPosY() + dir2 , blocks[3].getHeight(), blocks[3].getWidth());
 			blocks [4].drawBlock(blocks[4].getPosX() + blocks[4].getSpeed(), blocks[4].getPosY() + dir3 , blocks[4].getHeight(), blocks[4].getWidth());
 			blocks [5].drawBlock(blocks[5].getPosX() - blocks[5].getSpeed(), blocks[5].getPosY() + dir4 , blocks[5].getHeight(), blocks[5].getWidth());
+			blocks [6].drawBlock(blocks[6].getPosX() + dir5, blocks[6].getPosY() + blocks[6].getSpeed() , blocks[6].getHeight(), blocks[6].getWidth());
+			blocks [7].drawBlock(blocks[7].getPosX() + dir5, blocks[7].getPosY() - blocks[7].getSpeed() , blocks[7].getHeight(), blocks[7].getWidth());
 
 			//o checks if finger hits the blocks and game is lost
-			for (int i=0; i<6; i++)
+			for (int i=0; i<blocks.length; i++)
 			{
 				if (didTouchBlock(blocks[i], posX, posY))
 				{
@@ -249,7 +290,16 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		startMenu.getTexture().dispose();
 		lostMenu.getBatch().dispose();
 		lostMenu.getTexture().dispose();
-
+		background.getBatch().dispose();
+		background.getTexture().dispose();
+		timeText.getSpriteBatch().dispose();
+		timeText.getFont().dispose();
+		background.getTexture().dispose();
+		for(int i=0; i<blocks.length; i++)
+		{
+			blocks[i].getBatch().dispose();
+			blocks[i].getTexture().dispose();
+		}
 	}
 
 
@@ -379,7 +429,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 
 
 	//o checks if finger touched the block
-	public static boolean didTouchBlock(Block block, int posX, int posY)
+	public static boolean didTouchBlock(Blocks block, int posX, int posY)
 	{
 		int height = block.getHeight();
 		int width = block.getWidth();

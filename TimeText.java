@@ -59,5 +59,17 @@ public class TimeText
             text = text.substring(0, mone+3);
         return text;
 }
+
+    public SpriteBatch getSpriteBatch() {
+        return spriteBatch;
+    }
+
+    public BitmapFont getFont() {
+        return font;
+    }
+
+    public String getText() {
+        return text;
+    }
 }
 
