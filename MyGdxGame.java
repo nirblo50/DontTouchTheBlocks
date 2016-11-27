@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.GL20;
 
 import java.util.Random;
@@ -12,7 +13,9 @@ import static com.badlogic.gdx.Gdx.graphics;
 public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 
 
-	//private Block block1, block2, block3, block4, block5;
+	//o the Preferences of the high score
+	Preferences prefs;
+
 	private Block[] blocks;
 	private StartMenu startMenu;
 	private LostMenu lostMenu;
@@ -27,12 +30,19 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	private int posY;		//o the y position of the finger on the screen
 	private int dir1;		//o down or up (and speed) for 3rd block
 	private int dir2;		//o down or up (and speed) for 4th block
-
+	private float highScore;
+	private boolean lostFlag;		//o so high score will not continue after loosing
+	private float score;
 
 
 	@Override
 	public void create ()
 	{
+		//o the high score
+		prefs = Gdx.app.getPreferences("highScore");
+		highScore = prefs.getFloat("highScore");
+		lostFlag = false;
+
 		blocks = new Block[4];
 
 		//o sets the places for the first blocks
@@ -46,7 +56,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		blocks[0].setEnable(true);
 		blocks[1].setEnable(true);
 		blocks[2].setEnable(true);
-		blocks[3].setEnable(true);
 
 		blocks[0].setPosX(randomPos(blocks[0].getWidth()));
 		blocks[0].setPosY(Gdx.graphics.getHeight());
@@ -93,13 +102,16 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		{
 			timeText.drawText(timePast);        //o shows the time text
 
+			if(timePast > 4.0 )
+				blocks[3].setEnable(true);
+
 			//o if 1st block reach end
 			if ((blocks[0].getPosY() <= 0 - blocks[0].getHeight())) {
 				blocks[0].setHeight(randomHeighth());
 				blocks[0].setWidth((randomWidth()));
 				blocks[0].setPosX(randomPos(blocks[0].getWidth()));
 				blocks[0].setPosY(Gdx.graphics.getHeight());
-				blocks[0].setSpeed(randomSpeed());
+				blocks[0].setSpeed(randomSpeed(timePast));
 			}
 
 			//o if second block reach end
@@ -108,7 +120,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 				blocks[1].setWidth((randomWidth()));
 				blocks[1].setPosX(randomPos(blocks[1].getWidth()));
 				blocks[1].setPosY(0-blocks[1].getHeight());
-				blocks[1].setSpeed(randomSpeed());
+				blocks[1].setSpeed(randomSpeed(timePast));
 			}
 
 			//o if 3rd block reach end
@@ -117,7 +129,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 				blocks[2].setWidth((randomWidth()));
 				blocks[2].setPosX(0-blocks[2].getWidth());
 				blocks[2].setPosY(randomPos2(blocks[2].getHeight()));
-				blocks[2].setSpeed(randomSpeed());
+				blocks[2].setSpeed(randomSpeed(timePast));
 				dir1 = randomDir();
 			}
 
@@ -127,7 +139,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 				blocks[3].setWidth((randomWidth()));
 				blocks[3].setPosX(Gdx.graphics.getWidth());
 				blocks[3].setPosY(randomPos2(blocks[3].getHeight()));
-				blocks[3].setSpeed(randomSpeed());
+				blocks[3].setSpeed(randomSpeed(timePast));
 				dir2 = randomDir();
 			}
 
@@ -154,10 +166,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 
 
 
-
-
-
-
 		//o if did not started the game yet
 		else if (!gameLost)
 		{
@@ -168,8 +176,26 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		//o if the game was lost (finger lifted)
 		if(gameLost)
 		{
+			//o check if new score is better than the old high score
+			if (timePast > highScore && !lostFlag)
+			{
+				//o put the new score as the new high score
+				highScore = timePast;
+				prefs.putFloat("highScore", highScore);
+
+				//o update your preferences
+				prefs.flush();
+
+			}
+
+			if(!lostFlag)
+				score = timePast;
+
 			lostMenu.getBatch().enableBlending();
 			lostMenu.drawMenu();
+			timeText.drawScoreText(highScore, "highScore");
+			timeText.drawScoreText(score, "score");
+			lostFlag = true;
 		}
 
 
@@ -206,6 +232,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		isGame = true;
 		gameLost = false;
 		timePast = 0;
+		lostFlag = false;
 		return true;
 	}
 
@@ -284,10 +311,11 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 
 
 	//o randomize a x place to start the block
-	public static int randomSpeed()
+	public static int randomSpeed(float lv)
 	{
+		int lvl = (int) lv;
 		Random rnd = new Random();
-		int speed = rnd.nextInt(13-10)+10;
+		int speed = rnd.nextInt(13 + lvl /2 -10)+10;
 		return speed;
 	}
 
@@ -295,7 +323,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	public static int randomWidth()
 	{
 		Random rnd = new Random();
-		int weidth = rnd.nextInt(Gdx.graphics.getWidth() /3 - Gdx.graphics.getWidth() /6) + Gdx.graphics.getWidth() /5;
+		int weidth = rnd.nextInt(Gdx.graphics.getWidth() /3 - Gdx.graphics.getWidth() /4) + Gdx.graphics.getWidth() /4;
 		return weidth;
 	}
 
@@ -303,7 +331,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	public static int randomHeighth()
 	{
 		Random rnd = new Random();
-		int height = rnd.nextInt(Gdx.graphics.getHeight() /4 - Gdx.graphics.getHeight() /7 ) + Gdx.graphics.getHeight() /7;
+		int height = rnd.nextInt(Gdx.graphics.getHeight() /4 - Gdx.graphics.getHeight() /5 ) + Gdx.graphics.getHeight() /5;
 		return height;
 	}
 
