@@ -24,12 +24,9 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 
 
 	private int posX;		//o the x position of the finger on the screen
-	private int posY;		//o //o the y position of the finger on the screen
-	private int[] blockLocation;
-	private int[] height;
-	private int[] width;
-	private int posYB2;
-	private int posYB3;
+	private int posY;		//o the y position of the finger on the screen
+	private int dir1;		//o down or up (and speed) for 3rd block
+	private int dir2;		//o down or up (and speed) for 4th block
 
 
 
@@ -37,10 +34,6 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	public void create ()
 	{
 		blocks = new Block[4];
-		blockLocation = new int[4];
-		height = new int[4];
-		width = new int[4];
-
 
 		//o sets the places for the first blocks
 		for (int i = 0; i<4; i++)
@@ -51,15 +44,18 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		}
 
 		blocks[0].setEnable(true);
+		blocks[1].setEnable(true);
+		blocks[2].setEnable(true);
+		blocks[3].setEnable(true);
 
 		blocks[0].setPosX(randomPos(blocks[0].getWidth()));
 		blocks[0].setPosY(Gdx.graphics.getHeight());
 
 
 		blocks[1].setPosX(randomPos(blocks[1].getWidth()));
-		blocks[1].setPosY(0);
+		blocks[1].setPosY(0-blocks[1].getHeight());
 
-		blocks[2].setPosX(0);
+		blocks[2].setPosX(0-blocks[2].getWidth());
 		blocks[2].setPosY(randomPos2(blocks[2].getHeight()));
 
 		blocks[3].setPosX(Gdx.graphics.getWidth());
@@ -77,7 +73,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		posX = 0;
 		posY = 0;
 
-
+		dir1 = randomDir();
+		dir2 = randomDir();
 
 	}
 
@@ -94,40 +91,51 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		//o if the player had started the game
 		if (isGame)
 		{
-			timeText.drawText(timePast);		//o shows the time text
+			timeText.drawText(timePast);        //o shows the time text
 
-			//o resets the blocks values every round
-			for (int i=0; i<4; i++)
-			{
-				//o if 1st block reached all the way down
-				if ((blocks[i].getPosY() <= 0 - blocks[i].getHeight()) || (blocks[i].getPosX() <= 0 - blocks[i].getWidth()))
-				{
-					blocks[i].setHeight(randomHeighth());
-					blocks[i].setWidth((randomWidth()));
-
-
-					blocks[0].setPosX(randomPos(blocks[0].getWidth()));
-					blocks[0].setPosY(Gdx.graphics.getHeight());
-
-					blocks[1].setPosX(randomPos(blocks[1].getWidth()));
-					blocks[1].setPosY(0);
-
-					blocks[2].setPosX(0);
-					blocks[2].setPosY(randomPos2(blocks[2].getHeight()));
-
-					blocks[3].setPosX(Gdx.graphics.getWidth());
-					blocks[3].setPosY(randomPos2(blocks[3].getHeight()));
-
-
-					blocks[i].setSpeed(randomSpeed());
-				}
+			//o if 1st block reach end
+			if ((blocks[0].getPosY() <= 0 - blocks[0].getHeight())) {
+				blocks[0].setHeight(randomHeighth());
+				blocks[0].setWidth((randomWidth()));
+				blocks[0].setPosX(randomPos(blocks[0].getWidth()));
+				blocks[0].setPosY(Gdx.graphics.getHeight());
+				blocks[0].setSpeed(randomSpeed());
 			}
 
+			//o if second block reach end
+			if ((blocks[1].getPosY() >= Gdx.graphics.getHeight())) {
+				blocks[1].setHeight(randomHeighth());
+				blocks[1].setWidth((randomWidth()));
+				blocks[1].setPosX(randomPos(blocks[1].getWidth()));
+				blocks[1].setPosY(0-blocks[1].getHeight());
+				blocks[1].setSpeed(randomSpeed());
+			}
 
+			//o if 3rd block reach end
+			if (((blocks[2].getPosY() <= 0 - blocks[2].getHeight()) || (blocks[2].getPosX() <= 0 - blocks[2].getWidth())) || (blocks[2].getPosY() >= Gdx.graphics.getHeight()) || (blocks[2].getPosX() >= Gdx.graphics.getWidth())) {
+				blocks[2].setHeight(randomHeighth());
+				blocks[2].setWidth((randomWidth()));
+				blocks[2].setPosX(0-blocks[2].getWidth());
+				blocks[2].setPosY(randomPos2(blocks[2].getHeight()));
+				blocks[2].setSpeed(randomSpeed());
+				dir1 = randomDir();
+			}
+
+			//o if 4th block reach end
+			if (((blocks[3].getPosY() <= 0 - blocks[3].getHeight()) || (blocks[3].getPosX() <= 0 - blocks[3].getWidth())) || (blocks[3].getPosY() >= Gdx.graphics.getHeight()) || (blocks[3].getPosX() >= Gdx.graphics.getWidth())) {
+				blocks[3].setHeight(randomHeighth());
+				blocks[3].setWidth((randomWidth()));
+				blocks[3].setPosX(Gdx.graphics.getWidth());
+				blocks[3].setPosY(randomPos2(blocks[3].getHeight()));
+				blocks[3].setSpeed(randomSpeed());
+				dir2 = randomDir();
+			}
+
+			//o draw the blocks in their position
 			blocks [0].drawBlock(blocks[0].getPosX(), blocks[0].getPosY() - blocks[0].getSpeed(), blocks[0].getHeight(), blocks[0].getWidth());
-			//blocks [1].drawBlock(blocks[1].getPosX(), blocks[1].getPosY() + blocks[0].getSpeed(), height[0], width[0]);
-
-
+			blocks [1].drawBlock(blocks[1].getPosX(), blocks[1].getPosY() + blocks[1].getSpeed(), blocks[1].getHeight(), blocks[1].getWidth());
+			blocks [2].drawBlock(blocks[2].getPosX() + blocks[2].getSpeed(), blocks[2].getPosY() + dir1 , blocks[2].getHeight(), blocks[2].getWidth());
+			blocks [3].drawBlock(blocks[3].getPosX() - blocks[3].getSpeed(), blocks[3].getPosY() + dir2 , blocks[3].getHeight(), blocks[3].getWidth());
 
 
 			//o checks if finger hits the blocks and game is lost
@@ -192,11 +200,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		posX = screenX;
 		posY = Gdx.graphics.getHeight() - screenY;
 
+		if(gameLost)
+			create();
+
 		isGame = true;
 		gameLost = false;
 		timePast = 0;
-
-		blocks[0].setPosY(Gdx.graphics.getHeight());
 		return true;
 	}
 
@@ -278,7 +287,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	public static int randomSpeed()
 	{
 		Random rnd = new Random();
-		int speed = rnd.nextInt(25-10)+10;
+		int speed = rnd.nextInt(13-10)+10;
 		return speed;
 	}
 
@@ -296,6 +305,15 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		Random rnd = new Random();
 		int height = rnd.nextInt(Gdx.graphics.getHeight() /4 - Gdx.graphics.getHeight() /7 ) + Gdx.graphics.getHeight() /7;
 		return height;
+	}
+
+
+	//o generate a random Weidth for the block
+	public static int randomDir()
+	{
+		Random rnd = new Random();
+		int dir = rnd.nextInt(7+7)-7;
+		return dir;
 	}
 
 
