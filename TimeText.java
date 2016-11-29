@@ -25,21 +25,24 @@ public class TimeText
     {
         spriteBatch.begin();
         font.setColor(Color.WHITE);
-        font.getData().setScale(6);
+        font.getData().setScale(5);
         font.draw(spriteBatch, subText(time), font.getScaleX() , Gdx.graphics.getHeight()-font.getScaleY());
         spriteBatch.end();
     }
 
     public void drawScoreText (float score, String type )
     {
+        int x1 = (int)((double)Gdx.graphics.getWidth()*0.28);
+        int y1 =(int)((double)Gdx.graphics.getHeight()*0.49);
+        int y2 =(int)((double)Gdx.graphics.getHeight()*0.535);
         spriteBatch.begin();
         font.setColor(Color.BLACK);
-        font.getData().setScale(6);
+        font.getData().setScale(5);
 
         if (type.equals("highScore"))
-            font.draw(spriteBatch, "high score: " + subText(score)+"(s)", Gdx.graphics.getWidth()/2 - font.getScaleX()*50 ,Gdx.graphics.getHeight()/2-20);
+            font.draw(spriteBatch, "high score: " + subText(score)+"(s)", x1, y1);
         else
-            font.draw(spriteBatch, "score: " + subText(score)+ "(s)", Gdx.graphics.getWidth()/2 - font.getScaleX()*50 ,Gdx.graphics.getHeight()/2 + font.getScaleY()*14);
+            font.draw(spriteBatch, "score: " + subText(score)+ "(s)", x1 ,y2);
 
         spriteBatch.end();
     }

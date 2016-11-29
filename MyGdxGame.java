@@ -65,11 +65,11 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		blocks[1].setEnable(true);
 		blocks[2].setEnable(true);
 
-		blocks[0].setPosX(randomPos(blocks[0].getWidth()));
+		blocks[0].setPosX(randomPos(blocks[0].getWidth()));			//o up to zig down
 		blocks[0].setPosY(Gdx.graphics.getHeight());
 
 
-		blocks[1].setPosX(randomPos(blocks[1].getWidth()));
+		blocks[1].setPosX(randomPos(blocks[1].getWidth()));			//o down to up
 		blocks[1].setPosY(0-blocks[1].getHeight());
 
 		blocks[2].setPosX(0-blocks[2].getWidth());
@@ -225,7 +225,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 			blocks [4].drawBlock(blocks[4].getPosX() + blocks[4].getSpeed(), blocks[4].getPosY() + dir3 , blocks[4].getHeight(), blocks[4].getWidth());
 			blocks [5].drawBlock(blocks[5].getPosX() - blocks[5].getSpeed(), blocks[5].getPosY() + dir4 , blocks[5].getHeight(), blocks[5].getWidth());
 			blocks [6].drawBlock(blocks[6].getPosX() + dir5, blocks[6].getPosY() + blocks[6].getSpeed() , blocks[6].getHeight(), blocks[6].getWidth());
-			blocks [7].drawBlock(blocks[7].getPosX() + dir5, blocks[7].getPosY() - blocks[7].getSpeed() , blocks[7].getHeight(), blocks[7].getWidth());
+			blocks [7].drawBlock(blocks[7].getPosX() + dir6, blocks[7].getPosY() - blocks[7].getSpeed() , blocks[7].getHeight(), blocks[7].getWidth());
 
 			//o checks if finger hits the blocks and game is lost
 			for (int i=0; i<blocks.length; i++)
@@ -264,6 +264,8 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 				prefs.flush();
 
 			}
+
+
 
 			if(!lostFlag)
 				score = timePast;
@@ -309,9 +311,12 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 		posX = screenX;
 		posY = Gdx.graphics.getHeight() - screenY;
 
+		//o if lost game and restart
 		if(gameLost)
+		{
+			dispose();
 			create();
-
+		}
 		isGame = true;
 		gameLost = false;
 		timePast = 0;
