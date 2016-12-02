@@ -424,7 +424,7 @@ public class MyGdxGame extends ApplicationAdapter implements InputProcessor {
 	}
 
 
-	//o generate a random Weidth for the block
+	//o generate a random Weidth for the blocks
 	public static int randomDir()
 	{
 		Random rnd = new Random();
